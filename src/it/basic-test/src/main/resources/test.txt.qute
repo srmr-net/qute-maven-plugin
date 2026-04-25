@@ -1,0 +1,4 @@
+Message: {greeting}
+User: {user}
+Test Property: {testProp}
+Compiler Source: {maven.compiler.source}
