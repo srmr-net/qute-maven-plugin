@@ -19,6 +19,13 @@
         <maven.version>3.9.12</maven.version>
         <qute.version>3.17.4</qute.version>
     </properties>
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub srmr-net Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/srmr-net/qute-maven-plugin</url>
+        </repository>
+    </distributionManagement>
 
     <dependencies>
         <!-- Maven Plugin API -->
