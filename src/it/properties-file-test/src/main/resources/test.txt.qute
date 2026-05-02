@@ -1,0 +1,6 @@
+Message: {greeting}
+User: {user}
+Test Property: {testProp}
+Compiler Source: {maven.compiler.source}
+File Property: {custom.file.property}
+Nested File Property: {nested.property.from.file}

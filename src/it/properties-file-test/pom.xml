@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>net.srmr.it</groupId>
+    <artifactId>properties-file-test</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <properties>
+        <testProp>Custom Maven Property Value</testProp>
+        <maven.compiler.source>17</maven.compiler.source>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>net.srmr</groupId>
+                <artifactId>qute-maven-plugin</artifactId>
+                <version>@project.version@</version>
+                <executions>
+                    <execution>
+                        <id>generate-qute</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <removeExtension>.qute</removeExtension>
+                            <templateFiles>
+                                <directory>src/main/resources</directory>
+                                <includes>
+                                    <include>**/*.qute</include>
+                                </includes>
+                            </templateFiles>
+                            <propertiesFiles>
+                                <propertiesFile>test.properties</propertiesFile>
+                            </propertiesFiles>
+                            <templateValues>
+                                <greeting>Hello, Qute!</greeting>
+                                <user>Test User</user>
+                            </templateValues>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

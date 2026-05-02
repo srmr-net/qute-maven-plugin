@@ -68,6 +68,13 @@ public class QuteMojo extends AbstractMojo {
     @Parameter(defaultValue = "true", property = "useMavenProperties")
     private boolean useMavenProperties;
 
+    /**
+     * Optional list of properties files to load and pass to the Qute engine.
+     * Properties from these files will override Maven project properties if they have the same key.
+     */
+    @Parameter
+    private File[] propertiesFiles;
+
     public static class TemplateFiles {
         public File directory;
         public String[] includes;
@@ -108,19 +115,42 @@ public class QuteMojo extends AbstractMojo {
             return;
         }
 
+        java.util.Properties allProperties = new java.util.Properties();
+        if (useMavenProperties && project != null) {
+            java.util.Properties projProps = project.getProperties();
+            for (String key : projProps.stringPropertyNames()) {
+                allProperties.setProperty(key, projProps.getProperty(key));
+            }
+        }
+
+        if (propertiesFiles != null) {
+            for (File propFile : propertiesFiles) {
+                if (propFile.exists() && propFile.isFile()) {
+                    try (java.io.InputStream is = java.nio.file.Files.newInputStream(propFile.toPath())) {
+                        allProperties.load(is);
+                        getLog().info("Loaded properties from " + propFile.getAbsolutePath());
+                    } catch (IOException e) {
+                        throw new MojoExecutionException("Failed to load properties from " + propFile.getAbsolutePath(), e);
+                    }
+                } else {
+                    getLog().warn("Properties file " + propFile.getAbsolutePath() + " does not exist or is not a file.");
+                }
+            }
+        }
+
         // Initialize Qute Engine
         Engine engine = Engine.builder().addDefaults().build();
 
         for (String file : includedFiles) {
             try {
-                processTemplate(engine, basedir, file, charset);
+                processTemplate(engine, basedir, file, charset, allProperties);
             } catch (Exception e) {
                 throw new MojoExecutionException("Failed to process template: " + file, e);
             }
         }
     }
 
-    private void processTemplate(Engine engine, File basedir, String relativePath, Charset charset) throws IOException, MojoExecutionException {
+    private void processTemplate(Engine engine, File basedir, String relativePath, Charset charset, java.util.Properties properties) throws IOException, MojoExecutionException {
         File inputFile = new File(basedir, relativePath);
         getLog().debug("Processing template: " + inputFile.getAbsolutePath());
 
@@ -135,9 +165,7 @@ public class QuteMojo extends AbstractMojo {
 
         TemplateInstance instance = template.instance();
 
-        if (useMavenProperties && project != null) {
-            java.util.Properties properties = project.getProperties();
-            
+        if (properties != null && !properties.isEmpty()) {
             // Flat properties
             for (String key : properties.stringPropertyNames()) {
                 instance.data(key, properties.getProperty(key));
